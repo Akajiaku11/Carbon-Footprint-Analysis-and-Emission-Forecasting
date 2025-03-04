@@ -1,0 +1,93 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.linear_model import LinearRegression
+from statsmodels.tsa.arima.model import ARIMA
+from sklearn.model_selection import train_test_split
+
+# Step 1: Generate Synthetic Data
+def generate_synthetic_data(years=20):
+    """Generate synthetic carbon footprint data."""
+    np.random.seed(42)
+    years = np.arange(2000, 2000 + years)
+    emissions = 100 + 5 * years + np.random.normal(0, 10, size=len(years))  # Linear trend with noise
+    data = pd.DataFrame({'Year': years, 'Total_Emissions': emissions})
+    return data
+
+# Generate synthetic data
+data = generate_synthetic_data()
+print("Synthetic Data:")
+print(data.head())
+
+# Step 2: Data Visualization
+def plot_emissions(data):
+    """Plot total emissions over time."""
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(x='Year', y='Total_Emissions', data=data, marker='o')
+    plt.title('Total Carbon Emissions Over Time (Synthetic Data)')
+    plt.xlabel('Year')
+    plt.ylabel('Total Emissions (Metric Tons)')
+    plt.grid(True)
+    plt.show()
+
+plot_emissions(data)
+
+# Step 3: Emission Forecasting with ARIMA
+def forecast_with_arima(data, forecast_years=5):
+    """Forecast emissions using ARIMA."""
+    emissions = data['Total_Emissions'].values
+    model = ARIMA(emissions, order=(5, 1, 0))  # ARIMA(5,1,0) model
+    model_fit = model.fit()
+    forecast = model_fit.forecast(steps=forecast_years)
+    return forecast
+
+# Forecast the next 5 years
+forecast_years = 5
+arima_forecast = forecast_with_arima(data, forecast_years)
+print(f"ARIMA Forecast for the next {forecast_years} years: {arima_forecast}")
+
+# Step 4: Emission Forecasting with Linear Regression
+def forecast_with_linear_regression(data, forecast_years=5):
+    """Forecast emissions using Linear Regression."""
+    X = data[['Year']]
+    y = data['Total_Emissions']
+    model = LinearRegression()
+    model.fit(X, y)
+    future_years = np.arange(data['Year'].max() + 1, data['Year'].max() + 1 + forecast_years).reshape(-1, 1)
+    predictions = model.predict(future_years)
+    return future_years.flatten(), predictions
+
+# Forecast the next 5 years
+future_years, lr_forecast = forecast_with_linear_regression(data, forecast_years)
+print(f"Linear Regression Forecast for the next {forecast_years} years: {lr_forecast}")
+
+# Step 5: Visualize Forecasts
+def plot_forecasts(data, arima_forecast, lr_forecast, future_years):
+    """Plot historical data and forecasts."""
+    plt.figure(figsize=(10, 6))
+    sns.lineplot(x='Year', y='Total_Emissions', data=data, marker='o', label='Historical Data')
+    sns.lineplot(x=future_years, y=arima_forecast, marker='o', label='ARIMA Forecast')
+    sns.lineplot(x=future_years, y=lr_forecast, marker='o', label='Linear Regression Forecast')
+    plt.title('Carbon Emissions Forecast')
+    plt.xlabel('Year')
+    plt.ylabel('Total Emissions (Metric Tons)')
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
+plot_forecasts(data, arima_forecast, lr_forecast, future_years)
+
+# Step 6: Save Results
+def save_results(data, arima_forecast, lr_forecast, future_years):
+    """Save historical data and forecasts to a CSV file."""
+    forecast_data = pd.DataFrame({
+        'Year': future_years,
+        'ARIMA_Forecast': arima_forecast,
+        'Linear_Regression_Forecast': lr_forecast
+    })
+    combined_data = pd.concat([data, forecast_data], ignore_index=True)
+    combined_data.to_csv('carbon_footprint_analysis_results.csv', index=False)
+    print("Results saved to 'carbon_footprint_analysis_results.csv'.")
+
+save_results(data, arima_forecast, lr_forecast, future_years)
