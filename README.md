@@ -117,9 +117,9 @@ This project is licensed under the MIT License. See the LICENSE file for details
 Contact
 For questions or feedback, feel free to reach out:
 
-Email: desmondeteh@gmail.com
+Email: akajiakuflowz@gmail.com 
 
-GitHub: eteh1
+GitHub: Akajiaku11
 
 Repository: Carbon-Footprint-Analysis-and-Emission-Forecasting
 
